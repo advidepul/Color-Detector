@@ -1,0 +1,7 @@
+#!/bin/bash
+#Custom command for compiling a cpp file with c++11 linked to openCV lib 
+execFile="$1"
+cppFile="$execFile.cpp"
+lib=`pkg-config opencv --cflags --libs`
+compileCommand="g++ -std=c++11 -o $execFile $cppFile $lib"
+echo `$compileCommand`
