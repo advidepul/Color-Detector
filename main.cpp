@@ -14,8 +14,8 @@ cv::Mat colorDetection(cv::Scalar colorLow, cv::Scalar colorHigh, cv::Scalar col
 //        orange:30,80,200
 
     cv::Mat hsvFrame, inRangeFrame;
-    cv::cvtColor(frame, hsvFrame, cv::COLOR_BGR2HSV);
-    cv::inRange(hsvFrame, colorLow, colorHigh, inRangeFrame);
+    cv::cvtColor(frame, hsvFrame, cv::COLOR_BGR2HSV); //convert to HSV
+    cv::inRange(hsvFrame, colorLow, colorHigh, inRangeFrame); //find color that's within the given low-high range
     cv::Mat erosionElement = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(8, 8));
     cv::Mat dilateElement = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(15,15));
 //    cv::namedWindow("before", cv::WINDOW_NORMAL);
@@ -23,8 +23,8 @@ cv::Mat colorDetection(cv::Scalar colorLow, cv::Scalar colorHigh, cv::Scalar col
 //    cv::namedWindow("after",  cv::WINDOW_NORMAL);
 //    cv::resizeWindow("after", cv::Size(500,500));
 //    cv::imshow("before", inRangeFrame);
-    cv::erode(inRangeFrame, inRangeFrame, erosionElement);
-    cv::dilate(inRangeFrame, inRangeFrame, dilateElement);
+    cv::erode(inRangeFrame, inRangeFrame, erosionElement);//erode small noise
+    cv::dilate(inRangeFrame, inRangeFrame, dilateElement);//dilate detected color
 //    cv::imshow("after", inRangeFrame);
 
 
@@ -33,7 +33,7 @@ cv::Mat colorDetection(cv::Scalar colorLow, cv::Scalar colorHigh, cv::Scalar col
     vector<cv::Vec4i> hierarchy;
     cv::findContours(inRangeFrame, contours, hierarchy, cv::RetrievalModes::RETR_TREE, cv::CHAIN_APPROX_SIMPLE);
     for (int i = 0;i < contours.size();i++) {
-        cv::drawContours(frame, contours, i, color, 2, 8, hierarchy, 0, cv::Point());
+        cv::drawContours(frame, contours, i, color, 2, 8, hierarchy, 0, cv::Point()); //for every contours, draw lines
 
     }
 
@@ -41,25 +41,26 @@ cv::Mat colorDetection(cv::Scalar colorLow, cv::Scalar colorHigh, cv::Scalar col
 }
 
 bool colorTrack() {
-    const char* path = "autovideosrc device=/dev/video0  ! appsink";
+    const char* path = "autovideosrc device=/dev/video0  ! appsink"; //webcam path (id 0 for default laptop webcam)
     cv::VideoCapture webcam(path);
     if (!webcam.isOpened()) {
         cout << "Webcam not connected" << endl;
         return false;
     }
 
+    //HSV color code for six different colors (both low and high)
     int blueLow_H = 91, blueLow_S = 121, blueLow_V = 47;
     int blueHigh_H = 130, blueHigh_S = 255, blueHigh_V = 255;
     int greenLow_H = 46, greenLow_S = 143, greenLow_V = 41;
     int greenHigh_H = 84, greenHigh_S = 255, greenHigh_V = 145;
     int yellowLow_H = 29, yellowLow_S = 73, yellowLow_V = 87;
     int yellowHigh_H = 65, yellowHigh_S = 234, yellowHigh_V = 208;
-        int orangeLow_H = 0, orangeLow_S = 157, orangeLow_V = 117;
-        int orangeHigh_H = 30, orangeHigh_S = 255, orangeHigh_V = 198;
-        int redLow_H = 0, redLow_S = 202, redLow_V = 9;
-        int redHigh_H = 7, redHigh_S = 244, redHigh_V = 116;
-        int whiteLow_H = 19, whiteLow_S = 0, whiteLow_V = 110;
-        int whiteHigh_H = 72, whiteHigh_S = 44, whiteHigh_V = 219;
+    int orangeLow_H = 0, orangeLow_S = 157, orangeLow_V = 117;
+    int orangeHigh_H = 30, orangeHigh_S = 255, orangeHigh_V = 198;
+    int redLow_H = 0, redLow_S = 202, redLow_V = 9;
+    int redHigh_H = 7, redHigh_S = 244, redHigh_V = 116;
+    int whiteLow_H = 19, whiteLow_S = 0, whiteLow_V = 110;
+    int whiteHigh_H = 72, whiteHigh_S = 44, whiteHigh_V = 219;
 
     cv::Size windowSize(500,500);
 
@@ -83,6 +84,7 @@ bool colorTrack() {
         if (cv::waitKey(33) > 0) return false;
     }
 
+    //BELOW CODE IS USED FOR FINDING HSV COLOR RANGE (using trackbars for low/high H,S and V)
 //    int blueLow_H = 91, blueLow_S = 121, blueLow_V = 47;
 //    int blueHigh_H = 130, blueHigh_S = 255, blueHigh_V = 255;
 
